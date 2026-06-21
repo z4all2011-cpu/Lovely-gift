@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lovely | متجر الهدايا الرومانسية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink-50:#fdf2f4;
+    --pink-100:#fbe4e9;
+    --pink-200:#f6c9d3;
+    --rose:#c1485f;
+    --rose-dark:#9c3148;
+    --cream:#fbf3ec;
+    --gold:#c79a5a;
+    --text:#3c2a2e;
+    --muted:#8a6c72;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Cairo', sans-serif;
+    background:linear-gradient(180deg, var(--pink-50), var(--cream));
+    color:var(--text);
+    min-height:100vh;
+  }
+  .screen{ display:none; min-height:100vh; }
+  .screen.active{ display:block; }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(253,242,244,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--pink-200);
+    padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:19px; color:var(--rose-dark); }
+  .brand span.dot{ color:var(--gold); }
+  .nav-icons{ display:flex; gap:14px; }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:#fff; border:1px solid var(--pink-200);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:17px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:26px 18px 10px;
+    text-align:center;
+  }
+  .hero h1{
+    font-size:26px; font-weight:800; color:var(--rose-dark);
+    line-height:1.5;
+  }
+  .hero p{ color:var(--muted); margin-top:6px; font-size:14.5px; }
+  .hero .cta{
+    margin-top:16px;
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color:#fff; border:none; padding:13px 26px;
+    border-radius:30px; font-weight:700; font-size:15px;
+    box-shadow:0 8px 20px rgba(193,72,95,0.35);
+  }
+
+  /* ---------- Filters ---------- */
+  .filters{
+    display:flex; gap:8px; overflow-x:auto; padding:16px 18px 6px;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .filters::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto; padding:9px 18px; border-radius:20px;
+    background:#fff; border:1px solid var(--pink-200);
+    font-size:13.5px; font-weight:600; color:var(--muted);
+    white-space:nowrap; cursor:pointer;
+  }
+  .chip.active{ background:var(--rose); color:#fff; border-color:var(--rose); }
+
+  /* ---------- Product grid ---------- */
+  .grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    padding:14px 18px 90px;
+  }
+  .card{
+    background:#fff; border-radius:18px; overflow:hidden;
+    border:1px solid var(--pink-200);
+    box-shadow:0 4px 14px rgba(193,72,95,0.08);
+  }
+  .card .img{
+    height:120px; display:flex; align-items:center; justify-content:center;
+    font-size:42px; background:linear-gradient(135deg, var(--pink-100), var(--pink-200));
+  }
+  .card .info{ padding:11px 12px 13px; }
+  .card .name{ font-size:14px; font-weight:700; }
+  .card .price{ color:var(--rose-dark); font-weight:800; margin-top:4px; font-size:14px; }
+  .card .add{
+    margin-top:9px; width:100%; padding:8px; border:none; border-radius:10px;
+    background:var(--pink-100); color:var(--rose-dark); font-weight:700; font-size:13px;
+  }
+
+  /* ---------- Floating gift button ---------- */
+  .fab{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(135deg, var(--rose-dark), var(--rose));
+    color:#fff; border:none; padding:15px 28px; border-radius:30px;
+    font-weight:800; font-size:14.5px; box-shadow:0 10px 26px rgba(156,49,72,0.4);
+    display:flex; align-items:center; gap:8px; z-index:60;
+  }
+
+  /* ---------- Builder ---------- */
+  .builder{ max-width:480px; margin:0 auto; padding:18px; padding-bottom:100px; }
+  .builder-head{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .back-btn{ background:#fff; border:1px solid var(--pink-200); width:36px; height:36px; border-radius:50%; font-size:16px; }
+  .builder h2{ font-size:19px; font-weight:800; color:var(--rose-dark); }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:var(--muted); }
+  .field input, .field textarea{
+    width:100%; padding:12px 14px; border-radius:12px;
+    border:1.5px solid var(--pink-200); font-family:inherit; font-size:14.5px;
+    background:#fff;
+  }
+  .field textarea{ resize:vertical; min-height:70px; }
+
+  .card-block{
+    background:#fff; border:1.5px dashed var(--pink-200); border-radius:16px;
+    padding:14px; margin-bottom:14px; position:relative;
+  }
+  .card-block .remove{
+    position:absolute; top:10px; left:10px; background:var(--pink-100);
+    color:var(--rose-dark); border:none; width:26px; height:26px;
+    border-radius:50%; font-weight:800; font-size:13px;
+  }
+  .card-block .step-label{ font-weight:800; color:var(--rose); font-size:13px; margin-bottom:8px; }
+
+  .add-card-btn{
+    width:100%; padding:13px; border-radius:14px; border:1.5px dashed var(--rose);
+    background:var(--pink-50); color:var(--rose-dark); font-weight:700; font-size:14px;
+  }
+
+  .primary-btn{
+    width:100%; padding:15px; border:none; border-radius:16px; margin-top:8px;
+    background:linear-gradient(135deg, var(--rose), var(--rose-dark)); color:#fff;
+    font-weight:800; font-size:15.5px; box-shadow:0 8px 20px rgba(193,72,95,0.3);
+  }
+  .primary-btn:disabled{ opacity:0.5; }
+  .secondary-btn{
+    width:100%; padding:13px; border-radius:14px; margin-top:10px;
+    background:#fff; border:1.5px solid var(--pink-200); color:var(--rose-dark); font-weight:700; font-size:14px;
+  }
+
+  .hint{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.6; }
+
+  /* ---------- Result share screen ---------- */
+  .result-wrap{ max-width:480px; margin:60px auto; padding:24px; text-align:center; }
+  .result-wrap .emoji{ font-size:50px; }
+  .result-wrap h2{ font-size:21px; font-weight:800; color:var(--rose-dark); margin-top:10px; }
+  .result-wrap p{ color:var(--muted); margin-top:8px; font-size:14px; line-height:1.7; }
+  .link-box{
+    margin-top:20px; background:#fff; border:1.5px solid var(--pink-200); border-radius:14px;
+    padding:14px; word-break:break-all; font-size:13px; color:var(--rose-dark); font-weight:600;
+  }
+  .secret-box{
+    margin-top:12px; background:var(--pink-100); border-radius:14px; padding:14px;
+    font-size:15px; font-weight:800; color:var(--rose-dark); letter-spacing:1px;
+  }
+
+  /* ---------- Gift reveal: lock screen ---------- */
+  .reveal-screen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .lock-card{
+    max-width:380px; width:100%; text-align:center; background:#fff;
+    border-radius:24px; padding:40px 26px; box-shadow:0 20px 50px rgba(193,72,95,0.18);
+  }
+  .lock-card .lock-icon{ font-size:44px; }
+  .lock-card .label{ font-size:12px; letter-spacing:3px; color:var(--muted); margin-top:14px; font-weight:700; }
+  .lock-card input{
+    margin-top:18px; width:100%; text-align:center; padding:14px; border-radius:14px;
+    border:1.5px solid var(--pink-200); font-size:16px; letter-spacing:1px;
+  }
+  .lock-card button{
+    margin-top:14px; width:100%; padding:14px; border:none; border-radius:30px;
+    background:linear-gradient(135deg, var(--rose), var(--rose-dark)); color:#fff;
+    font-weight:800; font-size:15px;
+  }
+  .lock-error{ color:#c0392b; font-size:13px; margin-top:10px; display:none; font-weight:700; }
+
+  /* ---------- Gift reveal: welcome text screen ---------- */
+  .welcome-screen{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; position:relative; overflow:hidden; }
+  .welcome-card{ max-width:380px; width:100%; text-align:center; position:relative; z-index:2; }
+  .deco-line{ display:flex; align-items:center; gap:10px; justify-content:center; opacity:0.6; }
+  .deco-line .line{ width:70px; height:1px; background:var(--gold); }
+  .deco-line .diamond{ width:7px; height:7px; background:var(--gold); transform:rotate(45deg); }
+  .welcome-emoji{ font-size:42px; margin:22px 0; }
+  .welcome-text{ font-size:18px; line-height:2.1; color:var(--text); font-weight:500; }
+  .welcome-dot{ width:6px; height:6px; border-radius:50%; background:var(--pink-200); margin:26px auto; }
+  .next-pill{
+    margin-top:10px; display:inline-flex; align-items:center; gap:8px;
+    background:var(--pink-100); color:var(--rose-dark); border:none;
+    padding:13px 34px; border-radius:30px; font-family:'Caveat', cursive;
+    font-size:20px; font-weight:700; box-shadow:0 6px 16px rgba(193,72,95,0.15);
+  }
+
+  /* ---------- Gift reveal: stacked slideshow ---------- */
+  .slide-screen{ min-height:100vh; padding:0 0 110px; position:relative; overflow-x:hidden; }
+  .slide-stack{ max-width:420px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:0; }
+  .slide-item{
+    background:#fff; border-radius:22px; overflow:hidden; margin-bottom:18px;
+    box-shadow:0 14px 34px rgba(193,72,95,0.14);
+    animation:slideIn 0.55s cubic-bezier(.2,.8,.3,1);
+    position:relative;
+  }
+  @keyframes slideIn{
+    from{ opacity:0; transform:translateY(40px) scale(0.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  .slide-item .photo-wrap{ position:relative; width:100%; }
+  .slide-item img{ width:100%; max-height:520px; object-fit:cover; display:block; background:linear-gradient(135deg,var(--pink-100),var(--pink-200)); }
+  .slide-item .caption{
+    padding:18px 20px; text-align:center; font-size:16.5px; font-weight:600;
+    color:var(--text); background:#fff; position:relative;
+  }
+  .deco-heart{
+    position:absolute; font-size:20px; opacity:0.55; color:#a9826b;
+    pointer-events:none; user-select:none;
+  }
+
+  /* fixed decorative hearts scattered across viewport during slideshow */
+  .hearts-field{ position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .hearts-field span{ position:absolute; font-size:18px; opacity:0.35; color:#c08a6e; }
+
+  .slide-controls{
+    position:fixed; bottom:78px; left:50%; transform:translateX(-50%); z-index:30;
+    max-width:380px; width:calc(100% - 36px);
+    display:flex; justify-content:center;
+  }
+  .slide-next-btn{
+    background:var(--pink-100); color:var(--rose-dark); border:none;
+    padding:13px 34px; border-radius:30px; font-family:'Caveat', cursive;
+    font-size:20px; font-weight:700; box-shadow:0 8px 20px rgba(193,72,95,0.18);
+    display:flex; align-items:center; gap:8px;
+  }
+
+  /* ---------- Fixed music bar (like the video) ---------- */
+  .music-player{
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:40;
+    max-width:380px; width:calc(100% - 28px);
+    background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);
+    border-radius:30px; box-shadow:0 10px 28px rgba(193,72,95,0.18);
+    padding:8px 14px; display:none; align-items:center; gap:10px;
+  }
+  .music-player.show{ display:flex; }
+  .music-cover{
+    width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0;
+    background:linear-gradient(135deg, var(--gold), var(--rose));
+    animation:spin 6s linear infinite; animation-play-state:paused;
+  }
+  .music-cover.playing{ animation-play-state:running; }
+  @keyframes spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+  .music-btn{
+    width:28px; height:28px; border-radius:50%; border:none; background:var(--pink-100);
+    color:var(--rose-dark); font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .music-btn.play-pause{ width:34px; height:34px; background:var(--pink-200); font-size:13px; }
+  .music-info{ flex:1; min-width:0; }
+  .music-title{ font-size:11.5px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .music-progress-track{ width:100%; height:3px; background:var(--pink-200); border-radius:3px; margin-top:5px; overflow:hidden; }
+  .music-progress-fill{ height:100%; width:0%; background:var(--rose); border-radius:3px; }
+
+  /* final gift screen */
+  .final-screen{ text-align:center; padding:30px 22px; }
+  .final-screen .emoji{ font-size:54px; }
+  .final-screen h2{ font-family:'Caveat', cursive; font-size:34px; color:var(--rose-dark); margin-top:8px; }
+  .gift-reveal-box{
+    margin-top:18px; background:var(--pink-50); border:1.5px dashed var(--rose); border-radius:16px;
+    padding:16px;
+  }
+  .gift-reveal-box .gname{ font-weight:800; font-size:16px; color:var(--rose-dark); }
+  .gift-reveal-box .gprice{ color:var(--muted); margin-top:4px; font-size:13.5px; }
+
+  .loading{ text-align:center; padding:80px 20px; color:var(--muted); }
+
+  @media (min-width:600px){
+    .grid{ grid-template-columns:repeat(3, 1fr); max-width:760px; margin:0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN 1: SHOP ============ -->
+<div id="shop-screen" class="screen">
+  <div class="topbar">
+    <div class="brand">Lovely<span class="dot">.</span></div>
+    <div class="nav-icons">
+      <div class="icon-btn">🔍</div>
+      <div class="icon-btn">🛒</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>هدية بسيطة... 💌<br>لحد بتحبه</h1>
+    <p>اختار هدية وابعت معاها رسالة حب بطريقتك الخاصة</p>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="grid" id="product-grid"></div>
+
+  <button class="fab" onclick="goTo('builder-screen')">💝 اعمل إهداء مخصص</button>
+</div>
+
+<!-- ============ SCREEN 2: GIFT BUILDER ============ -->
+<div id="builder-screen" class="screen">
+  <div class="builder">
+    <div class="builder-head">
+      <button class="back-btn" onclick="goTo('shop-screen')">→</button>
+      <h2>اعمل إهداء مخصص 💝</h2>
+    </div>
+
+    <div class="field">
+      <label>اسم الشخص اللي هتهديله</label>
+      <input id="b-recipient" type="text" placeholder="مثال: ودي">
+    </div>
+
+    <div class="field">
+      <label>اختار الهدية</label>
+      <input id="b-gift" type="text" placeholder="مثال: باقة ورد + شوكولاتة" list="gift-suggestions">
+      <datalist id="gift-suggestions"></datalist>
+    </div>
+
+    <div class="field">
+      <label>كلمة السر (هيكتبها قبل ما يفتح الهدية)</label>
+      <input id="b-secret" type="text" placeholder="مثال: حبيبي">
+      <div class="hint">اختار كلمة بسيطة ومعروفة بينكم بس</div>
+    </div>
+
+    <div class="field">
+      <label>رسالة الترحيب (أول حاجة هتظهر بعد فتح القفل)</label>
+      <textarea id="b-welcome" placeholder="مثال: حبيت اعمل هديه جديده وعايزين نملاه صورنا بقا، بس قبل اي حاجه عايز تعرفي اني بحبك وربنا يخليكي ليا"></textarea>
+    </div>
+
+    <div class="field">
+      <label>أغنية الخلفية (اختياري) — ارفع ملف MP3</label>
+      <input id="b-song-file" type="file" accept="audio/*" onchange="handleSongUpload()">
+      <div class="hint" id="song-status"></div>
+      <input id="b-song" type="hidden">
+    </div>
+
+    <div id="cards-container"></div>
+    <button class="add-card-btn" onclick="addBuilderCard()">+ ضيف بطاقة (صورة + جملة)</button>
+
+    <button class="primary-btn" id="create-btn" onclick="createGift()">إنشاء رابط الإهداء 💖</button>
+    <div class="hint" style="text-align:center; margin-top:10px;">هينشئ رابط تقدر تبعته لأي حد، يفتح من أي موبايل</div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3: RESULT / SHARE ============ -->
+<div id="result-screen" class="screen">
+  <div class="result-wrap">
+    <div class="emoji">🎉</div>
+    <h2>تم إنشاء الإهداء!</h2>
+    <p>انسخ الرابط وابعته... وقول له الكلمة السر على حدة 😉</p>
+    <div class="link-box" id="result-link"></div>
+    <div class="secret-box" id="result-secret"></div>
+    <button class="primary-btn" onclick="copyResultLink()">📋 نسخ الرابط</button>
+    <button class="secondary-btn" onclick="goTo('shop-screen')">رجوع للمتجر</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN 4: LOADING (for gift links) ============ -->
+<div id="loading-screen" class="screen">
+  <div class="loading">جاري التحميل... 💌</div>
+</div>
+
+<!-- ============ SCREEN 5: LOCK (secret word) ============ -->
+<div id="lock-screen" class="screen">
+  <div class="reveal-screen">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <div class="label">ENTER THE SECRET WORD</div>
+      <input id="secret-input" type="text" placeholder="">
+      <button onclick="checkSecret()">💕 Unlock 💕</button>
+      <div class="lock-error" id="lock-error">الكلمة مش صح، جرب تاني 🤍</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 6a: WELCOME TEXT ============ -->
+<div id="welcome-screen" class="screen">
+  <div class="welcome-screen">
+    <div class="welcome-card">
+      <div class="deco-line"><div class="line"></div><div class="diamond"></div><div class="line"></div></div>
+      <div class="welcome-emoji">😍</div>
+      <div class="welcome-text" id="welcome-text"></div>
+      <div class="welcome-dot"></div>
+      <button class="next-pill" onclick="startSlideshow()">next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 6b: STACKED SLIDESHOW ============ -->
+<div id="slide-screen" class="screen">
+  <div class="slide-screen">
+    <div class="hearts-field" id="hearts-field"></div>
+    <div class="slide-stack" id="slide-stack"></div>
+    <div class="slide-controls">
+      <button class="slide-next-btn" id="slide-next-btn" onclick="revealNextSlide()">next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fixed music player, shown across welcome + slideshow screens -->
+<div class="music-player" id="music-player">
+  <img class="music-cover" id="music-cover">
+  <button class="music-btn" onclick="seekMusic(-5)">⏮</button>
+  <button class="music-btn play-pause" id="music-toggle" onclick="toggleMusic()">⏸</button>
+  <button class="music-btn" onclick="seekMusic(5)">⏭</button>
+  <div class="music-info">
+    <div class="music-title" id="music-title">وانت معايا 😍</div>
+    <div class="music-progress-track"><div class="music-progress-fill" id="music-progress"></div></div>
+  </div>
+</div>
+<audio id="audio-el" loop></audio>
+
+<!-- ============ SCREEN 7: FINAL GIFT REVEAL ============ -->
+<div id="final-screen" class="screen">
+  <div class="reveal-screen">
+    <div class="lock-card final-screen">
+      <div class="emoji">🎁</div>
+      <h2 id="final-recipient"></h2>
+      <p>هديتك جاهزة...</p>
+      <div class="gift-reveal-box">
+        <div class="gname" id="final-gift-name"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD8jOfaVZmCGNQEmBD9pUXJgs4Rnf42yFE",
+    authDomain: "lovely-gifts-7f779.firebaseapp.com",
+    projectId: "lovely-gifts-7f779",
+    storageBucket: "lovely-gifts-7f779.firebasestorage.app",
+    messagingSenderId: "320337049623",
+    appId: "1:320337049623:web:42e1b2382afdde554c0452",
+    measurementId: "G-NS2L2L5QGB"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window._db = db;
+  window._fb = { collection, addDoc, doc, getDoc };
+  window._fbReady = true;
+  document.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+/* ========================= DATA ========================= */
+const PRODUCTS = [
+  { id:1, name:"باقة ورد أحمر", price:"250 ج.م", emoji:"💐", tags:["love","flowers"] },
+  { id:2, name:"شوكولاتة فاخرة", price:"180 ج.م", emoji:"🍫", tags:["love","sweet"] },
+  { id:3, name:"دبدوب تيدي", price:"220 ج.م", emoji:"🧸", tags:["love","cute"] },
+  { id:4, name:"شمعة معطرة", price:"150 ج.م", emoji:"🕯️", tags:["love","cozy"] },
+  { id:5, name:"بطاقة معايدة مكتوبة", price:"60 ج.م", emoji:"💌", tags:["love","card"] },
+  { id:6, name:"قلادة قلب فضة", price:"450 ج.م", emoji:"💍", tags:["love","jewelry"] },
+  { id:7, name:"بوكيه ورد مجفف", price:"300 ج.م", emoji:"🌹", tags:["love","flowers"] },
+  { id:8, name:"كوب مطبوع باسمك", price:"130 ج.م", emoji:"☕", tags:["love","custom"] },
+  { id:9, name:"بالونات قلوب", price:"100 ج.م", emoji:"🎈", tags:["love","party"] },
+];
+
+const FILTERS = [
+  { key:"all", label:"الكل" },
+  { key:"love", label:"💖 حب" },
+  { key:"flowers", label:"🌸 ورد" },
+  { key:"sweet", label:"🍬 حلويات" },
+  { key:"jewelry", label:"💍 إكسسوار" },
+];
+
+/* ========================= ROUTER ========================= */
+function goTo(screenId){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo(0,0);
+
+  const player = document.getElementById('music-player');
+  const giftScreens = ['welcome-screen','slide-screen','final-screen'];
+  if(currentGift && currentGift.song && giftScreens.includes(screenId)){
+    player.classList.add('show');
+  }else{
+    player.classList.remove('show');
+  }
+}
+
+/* ========================= SHOP ========================= */
+function renderFilters(activeKey){
+  const wrap = document.getElementById('filters');
+  wrap.innerHTML = FILTERS.map(f =>
+    `<div class="chip ${f.key===activeKey?'active':''}" onclick="applyFilter('${f.key}')">${f.label}</div>`
+  ).join('');
+}
+
+function renderProducts(filterKey){
+  const grid = document.getElementById('product-grid');
+  const list = filterKey === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.tags.includes(filterKey));
+  grid.innerHTML = list.map(p => `
+    <div class="card">
+      <div class="img">${p.emoji}</div>
+      <div class="info">
+        <div class="name">${p.name}</div>
+        <div class="price">${p.price}</div>
+        <button class="add" onclick="pickGiftFromShop('${p.name.replace(/'/g,"\\'")}')">اختار للإهداء</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyFilter(key){
+  renderFilters(key);
+  renderProducts(key);
+  const url = new URL(window.location);
+  url.searchParams.set('filter', key);
+  window.history.replaceState({}, '', url);
+}
+
+function pickGiftFromShop(name){
+  goTo('builder-screen');
+  document.getElementById('b-gift').value = name;
+}
+
+function fillGiftSuggestions(){
+  const dl = document.getElementById('gift-suggestions');
+  dl.innerHTML = PRODUCTS.map(p => `<option value="${p.name}">`).join('');
+}
+
+/* ========================= BUILDER ========================= */
+let cardCount = 0;
+function addBuilderCard(){
+  cardCount++;
+  const id = cardCount;
+  const wrap = document.createElement('div');
+  wrap.className = 'card-block';
+  wrap.id = `card-block-${id}`;
+  wrap.innerHTML = `
+    <button class="remove" onclick="removeBuilderCard(${id})">×</button>
+    <div class="step-label">بطاقة ${id}</div>
+    <div class="field">
+      <label>الصورة</label>
+      <input id="card-file-${id}" type="file" accept="image/*" onchange="handleImageUpload(${id})">
+      <div class="hint" id="card-status-${id}"></div>
+      <input id="card-img-${id}" type="hidden">
+      <img id="card-preview-${id}" style="display:none; width:100%; border-radius:12px; margin-top:8px; max-height:160px; object-fit:cover;">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>الجملة اللي هتظهر تحت الصورة</label>
+      <input id="card-text-${id}" type="text" placeholder="مثال: بحبك 💕">
+    </div>
+  `;
+  document.getElementById('cards-container').appendChild(wrap);
+}
+function removeBuilderCard(id){
+  document.getElementById(`card-block-${id}`).remove();
+}
+
+const IMGBB_API_KEY = "4d80ce9c9e86984b24a536deba392ffd";
+
+/* ⚠️ Cloudinary free unsigned upload — replace with your own cloud name + preset.
+   Steps: cloudinary.com → sign up free → Dashboard shows "Cloud name".
+   Settings → Upload → Add upload preset → set "Signing Mode" to "Unsigned" → save → copy preset name. */
+const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME";
+const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+
+async function handleSongUpload(){
+  const fileInput = document.getElementById('b-song-file');
+  const statusEl = document.getElementById('song-status');
+  const hiddenInput = document.getElementById('b-song');
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  statusEl.textContent = '⏳ جاري رفع الأغنية...';
+  statusEl.style.color = '#8a6c72';
+
+  try{
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if(data.secure_url){
+      hiddenInput.value = data.secure_url;
+      statusEl.textContent = '✅ تم رفع الأغنية';
+      statusEl.style.color = '#2e7d32';
+    }else{
+      statusEl.textContent = '❌ فشل رفع الأغنية، جرب تاني';
+      statusEl.style.color = '#c0392b';
+      console.error(data);
+    }
+  }catch(err){
+    console.error(err);
+    statusEl.textContent = '❌ حصل خطأ في رفع الأغنية';
+    statusEl.style.color = '#c0392b';
+  }
+}
+
+async function handleImageUpload(id){
+  const fileInput = document.getElementById(`card-file-${id}`);
+  const statusEl = document.getElementById(`card-status-${id}`);
+  const hiddenInput = document.getElementById(`card-img-${id}`);
+  const preview = document.getElementById(`card-preview-${id}`);
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  statusEl.textContent = '⏳ جاري رفع الصورة...';
+  statusEl.style.color = '#8a6c72';
+
+  try{
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if(data.success){
+      hiddenInput.value = data.data.url;
+      preview.src = data.data.url;
+      preview.style.display = 'block';
+      statusEl.textContent = '✅ تم رفع الصورة';
+      statusEl.style.color = '#2e7d32';
+    }else{
+      statusEl.textContent = '❌ فشل الرفع، جرب تاني';
+      statusEl.style.color = '#c0392b';
+    }
+  }catch(err){
+    console.error(err);
+    statusEl.textContent = '❌ حصل خطأ في الرفع';
+    statusEl.style.color = '#c0392b';
+  }
+}
+
+async function createGift(){
+  const recipient = document.getElementById('b-recipient').value.trim();
+  const giftName = document.getElementById('b-gift').value.trim();
+  const secret = document.getElementById('b-secret').value.trim();
+  const welcomeMsg = document.getElementById('b-welcome').value.trim();
+  const song = document.getElementById('b-song').value.trim();
+
+  if(!recipient || !giftName || !secret){
+    alert('من فضلك املا اسم الشخص، الهدية، وكلمة السر');
+    return;
+  }
+
+  const cardBlocks = document.querySelectorAll('#cards-container .card-block');
+  const cards = [];
+  cardBlocks.forEach(block => {
+    const id = block.id.split('-').pop();
+    const img = document.getElementById(`card-img-${id}`).value.trim();
+    const text = document.getElementById(`card-text-${id}`).value.trim();
+    if(img || text) cards.push({ img, text });
+  });
+
+  if(cards.length === 0){
+    alert('ضيف بطاقة واحدة على الأقل');
+    return;
+  }
+
+  const btn = document.getElementById('create-btn');
+  btn.disabled = true;
+  btn.textContent = 'جاري الإنشاء...';
+
+  const giftData = {
+    recipient, giftName, secret: secret.toLowerCase(), welcomeMsg, song, cards,
+    createdAt: Date.now()
+  };
+
+  try{
+    if(!window._fbReady){
+      await new Promise(resolve => document.addEventListener('fb-ready', resolve, { once:true }));
+    }
+    const { collection, addDoc } = window._fb;
+    const docRef = await addDoc(collection(window._db, "gifts"), giftData);
+    const link = `${window.location.origin}${window.location.pathname}?gift=${docRef.id}`;
+    document.getElementById('result-link').textContent = link;
+    document.getElementById('result-secret').textContent = `الكلمة السر: ${secret}`;
+    window._lastLink = link;
+    goTo('result-screen');
+  }catch(err){
+    console.error(err);
+    alert('حصل خطأ، تأكد إن إعدادات Firebase مظبوطة صح');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'إنشاء رابط الإهداء 💖';
+  }
+}
+
+function copyResultLink(){
+  navigator.clipboard.writeText(window._lastLink).then(()=>{
+    alert('تم نسخ الرابط ✅');
+  });
+}
+
+/* ========================= GIFT REVEAL FLOW ========================= */
+let currentGift = null;
+
+async function loadGiftFromURL(giftId){
+  goTo('loading-screen');
+  try{
+    if(!window._fbReady){
+      await new Promise(resolve => document.addEventListener('fb-ready', resolve, { once:true }));
+    }
+    const { doc, getDoc } = window._fb;
+    const snap = await getDoc(doc(window._db, "gifts", giftId));
+    if(!snap.exists()){
+      document.getElementById('loading-screen').querySelector('.loading').textContent = 'الرابط ده مش موجود 💔';
+      return;
+    }
+    currentGift = snap.data();
+    goTo('lock-screen');
+  }catch(err){
+    console.error(err);
+    document.getElementById('loading-screen').querySelector('.loading').textContent = 'حصل خطأ في تحميل الهدية';
+  }
+}
+
+function checkSecret(){
+  const input = document.getElementById('secret-input').value.trim().toLowerCase();
+  const errorEl = document.getElementById('lock-error');
+  if(!currentGift){ return; }
+  if(input === currentGift.secret){
+    errorEl.style.display = 'none';
+    document.getElementById('welcome-text').textContent = currentGift.welcomeMsg ||
+      `حبيت اعمل هديه جديده وعايزين نملاه صورنا بقا، بس قبل اي حاجه عايز تعرفك اني بحبك 💕`;
+    setupMusicPlayer();
+    goTo('welcome-screen');
+  }else{
+    errorEl.style.display = 'block';
+  }
+}
+
+/* ---------- Music player ---------- */
+function setupMusicPlayer(){
+  const player = document.getElementById('music-player');
+  const audio = document.getElementById('audio-el');
+  if(currentGift.song){
+    audio.src = currentGift.song;
+    document.getElementById('music-title').textContent = `${currentGift.recipient} 😍`;
+    player.classList.add('show');
+    audio.play().then(()=>{
+      document.getElementById('music-toggle').textContent = '⏸';
+      document.getElementById('music-cover').classList.add('playing');
+    }).catch(()=>{
+      // autoplay blocked by browser until user interacts — that's fine, toggle button still works
+      document.getElementById('music-toggle').textContent = '▶';
+    });
+    audio.ontimeupdate = () => {
+      if(audio.duration){
+        const pct = (audio.currentTime / audio.duration) * 100;
+        document.getElementById('music-progress').style.width = pct + '%';
+      }
+    };
+  }else{
+    player.classList.remove('show');
+  }
+}
+function toggleMusic(){
+  const audio = document.getElementById('audio-el');
+  const btn = document.getElementById('music-toggle');
+  const cover = document.getElementById('music-cover');
+  if(audio.paused){
+    audio.play();
+    btn.textContent = '⏸';
+    cover.classList.add('playing');
+  }else{
+    audio.pause();
+    btn.textContent = '▶';
+    cover.classList.remove('playing');
+  }
+}
+function seekMusic(seconds){
+  const audio = document.getElementById('audio-el');
+  audio.currentTime = Math.max(0, audio.currentTime + seconds);
+}
+
+/* ---------- Decorative floating hearts ---------- */
+function renderHeartsField(){
+  const field = document.getElementById('hearts-field');
+  const hearts = ['🤎','💕','♡'];
+  let html = '';
+  for(let i=0;i<14;i++){
+    const left = Math.random()*100;
+    const top = Math.random()*100;
+    const size = 14 + Math.random()*14;
+    const heart = hearts[Math.floor(Math.random()*hearts.length)];
+    html += `<span style="left:${left}%; top:${top}%; font-size:${size}px;">${heart}</span>`;
+  }
+  field.innerHTML = html;
+}
+
+/* ---------- Stacked slideshow ---------- */
+let revealedCount = 0;
+
+function startSlideshow(){
+  revealedCount = 0;
+  document.getElementById('slide-stack').innerHTML = '';
+  renderHeartsField();
+  goTo('slide-screen');
+  revealNextSlide();
+}
+
+function revealNextSlide(){
+  if(revealedCount >= currentGift.cards.length){
+    showFinalGift();
+    return;
+  }
+  const card = currentGift.cards[revealedCount];
+  const stack = document.getElementById('slide-stack');
+  const item = document.createElement('div');
+  item.className = 'slide-item';
+  item.innerHTML = `
+    <div class="photo-wrap">
+      <img src="${card.img || ''}" alt="">
+    </div>
+    <div class="caption">${card.text || ''}</div>
+    <span class="deco-heart" style="left:8%; bottom:36px;">🤎</span>
+    <span class="deco-heart" style="left:45%; bottom:30px;">🤎</span>
+    <span class="deco-heart" style="right:8%; bottom:40px;">🤎</span>
+  `;
+  stack.appendChild(item);
+  revealedCount++;
+
+  item.scrollIntoView({ behavior:'smooth', block:'center' });
+
+  const nextBtn = document.getElementById('slide-next-btn');
+  nextBtn.textContent = revealedCount >= currentGift.cards.length ? 'وصلت الهدية 🎁' : 'next →';
+}
+
+function showFinalGift(){
+  document.getElementById('final-recipient').textContent = `يا ${currentGift.recipient} 💕`;
+  document.getElementById('final-gift-name').textContent = `هديتك: ${currentGift.giftName}`;
+  goTo('final-screen');
+}
+
+/* ========================= INIT ========================= */
+function init(){
+  fillGiftSuggestions();
+  const params = new URLSearchParams(window.location.search);
+  const giftId = params.get('gift');
+
+  if(giftId){
+    loadGiftFromURL(giftId);
+  }else{
+    const filterParam = params.get('filter') || 'all';
+    renderFilters(filterParam);
+    renderProducts(filterParam);
+    goTo('shop-screen');
+  }
+}
+init();
+</script>
+
+</body>
+</html>
