@@ -343,10 +343,9 @@
     </div>
 
     <div class="field">
-      <label>أغنية الخلفية (اختياري) — ارفع ملف MP3</label>
-      <input id="b-song-file" type="file" accept="audio/*" onchange="handleSongUpload()">
-      <div class="hint" id="song-status"></div>
-      <input id="b-song" type="hidden">
+      <label>رابط أغنية مباشر (اختياري) — لازم ينتهي بـ .mp3</label>
+      <input id="b-song" type="text" placeholder="https://example.com/song.mp3">
+      <div class="hint">رابط MP3 مباشر بس (مش يوتيوب ولا ساوندكلاود) — يقدر يشتغل تلقائي جوه الصفحة</div>
     </div>
 
     <div id="cards-container"></div>
@@ -570,47 +569,34 @@ function removeBuilderCard(id){
   document.getElementById(`card-block-${id}`).remove();
 }
 
-const IMGBB_API_KEY = "4d80ce9c9e86984b24a536deba392ffd";
+/* ---------- Image handling: compress + convert to Base64, stored only in Firebase ---------- */
+/* لا يتم رفع الصور لأي سيرفر خارجي — كل شيء يتحول لنص ويتخزن داخل مشروع Firebase بتاعك فقط */
 
-/* ⚠️ Cloudinary free unsigned upload — replace with your own cloud name + preset.
-   Steps: cloudinary.com → sign up free → Dashboard shows "Cloud name".
-   Settings → Upload → Add upload preset → set "Signing Mode" to "Unsigned" → save → copy preset name. */
-const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME";
-const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
-
-async function handleSongUpload(){
-  const fileInput = document.getElementById('b-song-file');
-  const statusEl = document.getElementById('song-status');
-  const hiddenInput = document.getElementById('b-song');
-  const file = fileInput.files[0];
-  if(!file) return;
-
-  statusEl.textContent = '⏳ جاري رفع الأغنية...';
-  statusEl.style.color = '#8a6c72';
-
-  try{
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if(data.secure_url){
-      hiddenInput.value = data.secure_url;
-      statusEl.textContent = '✅ تم رفع الأغنية';
-      statusEl.style.color = '#2e7d32';
-    }else{
-      statusEl.textContent = '❌ فشل رفع الأغنية، جرب تاني';
-      statusEl.style.color = '#c0392b';
-      console.error(data);
-    }
-  }catch(err){
-    console.error(err);
-    statusEl.textContent = '❌ حصل خطأ في رفع الأغنية';
-    statusEl.style.color = '#c0392b';
-  }
+function compressImageToBase64(file, maxWidth = 800, quality = 0.65){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxWidth){
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const base64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(base64);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 async function handleImageUpload(id){
@@ -621,30 +607,27 @@ async function handleImageUpload(id){
   const file = fileInput.files[0];
   if(!file) return;
 
-  statusEl.textContent = '⏳ جاري رفع الصورة...';
+  statusEl.textContent = '⏳ جاري تجهيز الصورة...';
   statusEl.style.color = '#8a6c72';
 
   try{
-    const formData = new FormData();
-    formData.append('image', file);
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if(data.success){
-      hiddenInput.value = data.data.url;
-      preview.src = data.data.url;
-      preview.style.display = 'block';
-      statusEl.textContent = '✅ تم رفع الصورة';
-      statusEl.style.color = '#2e7d32';
-    }else{
-      statusEl.textContent = '❌ فشل الرفع، جرب تاني';
-      statusEl.style.color = '#c0392b';
+    // نبدأ بجودة متوسطة ونقلل لو الحجم كبير، عشان نفضل تحت حد Firestore (1MB لكل بطاقة)
+    let base64 = await compressImageToBase64(file, 800, 0.65);
+    if(base64.length > 700000){
+      base64 = await compressImageToBase64(file, 600, 0.5);
     }
+    if(base64.length > 700000){
+      base64 = await compressImageToBase64(file, 450, 0.4);
+    }
+
+    hiddenInput.value = base64;
+    preview.src = base64;
+    preview.style.display = 'block';
+    statusEl.textContent = '✅ تم تجهيز الصورة (متخزنة في حسابك فقط)';
+    statusEl.style.color = '#2e7d32';
   }catch(err){
     console.error(err);
-    statusEl.textContent = '❌ حصل خطأ في الرفع';
+    statusEl.textContent = '❌ حصل خطأ، جرب صورة تانية';
     statusEl.style.color = '#c0392b';
   }
 }
@@ -672,6 +655,13 @@ async function createGift(){
 
   if(cards.length === 0){
     alert('ضيف بطاقة واحدة على الأقل');
+    return;
+  }
+
+  // فحص الحجم الكلي قبل الحفظ — Firestore بيحدد 1 ميجابايت لكل مستند
+  const totalSize = cards.reduce((sum, c) => sum + (c.img ? c.img.length : 0), 0);
+  if(totalSize > 900000){
+    alert('الصور كتيرة أو كبيرة شوية (المجموع تعدى الحد المسموح). قلل عدد البطاقات أو اختار صور أصغر وجرب تاني.');
     return;
   }
 
