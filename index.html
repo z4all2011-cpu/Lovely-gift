@@ -188,6 +188,23 @@
   }
   .lock-error{ color:#c0392b; font-size:13px; margin-top:10px; display:none; font-weight:700; }
 
+  /* ---------- Countdown screen ---------- */
+  .countdown-screen-wrap{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+  .countdown-card{ max-width:400px; width:100%; text-align:center; }
+  .countdown-title{ font-family:'Caveat', cursive; font-size:32px; font-weight:700; color:var(--rose-dark); margin-bottom:22px; }
+  .countdown-since{ font-size:13.5px; color:var(--muted); font-weight:700; margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .countdown-since .date-badge{ background:var(--pink-100); padding:6px 14px; border-radius:20px; color:var(--rose-dark); font-weight:800; }
+  .countdown-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+  .countdown-unit{
+    background:#fff; border-radius:16px; padding:14px 6px 12px;
+    box-shadow:0 6px 18px rgba(193,72,95,0.1);
+    border:1px solid var(--pink-200);
+  }
+  .countdown-num{ font-size:34px; font-weight:800; color:var(--rose-dark); line-height:1; display:block; }
+  .countdown-label{ font-size:12px; font-weight:700; color:var(--muted); margin-top:6px; display:block; }
+  .countdown-quote{ font-size:15px; color:var(--muted); font-weight:600; margin-top:6px; }
+  .countdown-next{ margin-top:22px; }
+
   /* ---------- Gift reveal: welcome text screen ---------- */
   .welcome-screen{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; position:relative; overflow:hidden; }
   .welcome-card{ max-width:380px; width:100%; text-align:center; position:relative; z-index:2; }
@@ -368,6 +385,22 @@
       <div class="hint">رابط MP3 مباشر بس (مش يوتيوب ولا ساوندكلاود) — يقدر يشتغل تلقائي جوه الصفحة</div>
     </div>
 
+    <div class="field">
+      <label>تاريخ بداية العلاقة 💗 (اختياري — هيظهر عداد "بد/يتنا")</label>
+      <input id="b-start-date" type="date">
+      <div class="hint">لو حطيت تاريخ، هتظهر شاشة عداد تفاعلي قبل البطاقات</div>
+    </div>
+
+    <div class="field">
+      <label>جملة العداد (اختياري)</label>
+      <input id="b-countdown-msg" type="text" placeholder="مثال: كل ثانية بتعدي وانتِ في قلبي ❤️" value="كل ثانية بتعدي وانتِ في قلبي ❤️">
+    </div>
+
+    <div class="field">
+      <label>رسالة الختام (آخر حاجة هتظهر بعد كل البطاقات)</label>
+      <textarea id="b-final-msg" placeholder="مثال: يا أغلى حاجة عندي، بحبك أوي وربنا يخليكِ لي دايمًا 💕"></textarea>
+    </div>
+
     <div id="cards-container"></div>
     <button class="add-card-btn" onclick="addBuilderCard()">+ ضيف بطاقة (صورة + جملة)</button>
 
@@ -403,6 +436,31 @@
       <input id="secret-input" type="text" placeholder="">
       <button onclick="checkSecret()">💕 Unlock 💕</button>
       <div class="lock-error" id="lock-error">الكلمة مش صح، جرب تاني 🤍</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 5b: COUNTDOWN ============ -->
+<div id="countdown-screen" class="screen">
+  <div class="countdown-screen-wrap">
+    <div class="countdown-card">
+      <div class="countdown-title">بد/يتنا 💞</div>
+      <div class="countdown-since">
+        <span>💗</span>
+        <span>سوا من</span>
+        <span class="date-badge" id="cd-start-date"></span>
+        <span>💗</span>
+      </div>
+      <div class="countdown-grid">
+        <div class="countdown-unit"><span class="countdown-num" id="cd-days">0</span><span class="countdown-label">يوم</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-hours">0</span><span class="countdown-label">ساعة</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-mins">0</span><span class="countdown-label">دقيقة</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-secs">0</span><span class="countdown-label">ثانية</span></div>
+      </div>
+      <div class="countdown-quote" id="cd-quote"></div>
+      <div class="countdown-next">
+        <button class="next-pill" onclick="proceedFromCountdown()">next →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -450,7 +508,6 @@
     <div class="lock-card final-screen">
       <div class="emoji">🎉</div>
       <h2 id="final-recipient"></h2>
-      <p>هديتك جاهزة...</p>
       <div class="gift-reveal-box">
         <span class="gift-sparkle" style="left:18%; top:10%; animation-delay:0.1s;">✨</span>
         <span class="gift-sparkle" style="right:16%; top:14%; animation-delay:0.6s;">✨</span>
@@ -458,6 +515,7 @@
         <span class="gift-sparkle" style="right:26%; bottom:12%; animation-delay:1.6s;">✨</span>
         <div class="gift-visual" id="final-gift-visual"></div>
         <div class="gname" id="final-gift-name"></div>
+        <div id="final-msg" style="margin-top:14px; font-size:15px; line-height:1.8; color:var(--text); font-weight:500; white-space:pre-line;"></div>
       </div>
     </div>
   </div>
@@ -516,7 +574,7 @@ function goTo(screenId){
   window.scrollTo(0,0);
 
   const player = document.getElementById('music-player');
-  const giftScreens = ['welcome-screen','slide-screen','final-screen'];
+  const giftScreens = ['countdown-screen','welcome-screen','slide-screen','final-screen'];
   if(currentGift && currentGift.song && giftScreens.includes(screenId)){
     player.classList.add('show');
   }else{
@@ -663,6 +721,9 @@ async function createGift(){
   const secret = document.getElementById('b-secret').value.trim();
   const welcomeMsg = document.getElementById('b-welcome').value.trim();
   const song = document.getElementById('b-song').value.trim();
+  const startDate = document.getElementById('b-start-date').value;
+  const countdownMsg = document.getElementById('b-countdown-msg').value.trim();
+  const finalMsg = document.getElementById('b-final-msg').value.trim();
 
   if(!recipient || !giftName || !secret){
     alert('من فضلك املا اسم الشخص، الهدية، وكلمة السر');
@@ -695,7 +756,8 @@ async function createGift(){
   btn.textContent = 'جاري الإنشاء...';
 
   const giftData = {
-    recipient, giftName, secret: secret.toLowerCase(), welcomeMsg, song, cards,
+    recipient, giftName, secret: secret.toLowerCase(), welcomeMsg,
+    song, startDate, countdownMsg, finalMsg, cards,
     createdAt: Date.now()
   };
 
@@ -754,13 +816,56 @@ function checkSecret(){
   if(!currentGift){ return; }
   if(input === currentGift.secret){
     errorEl.style.display = 'none';
-    document.getElementById('welcome-text').textContent = currentGift.welcomeMsg ||
-      `حبيت اعمل هديه جديده وعايزين نملاه صورنا بقا، بس قبل اي حاجه عايز تعرفك اني بحبك 💕`;
     setupMusicPlayer();
-    goTo('welcome-screen');
+    if(currentGift.startDate){
+      showCountdown();
+    }else{
+      showWelcome();
+    }
   }else{
     errorEl.style.display = 'block';
   }
+}
+
+/* ---------- Countdown screen ---------- */
+let _countdownTimer = null;
+
+function showCountdown(){
+  const start = new Date(currentGift.startDate);
+  const dateStr = currentGift.startDate.split('-').reverse().join('-');
+  document.getElementById('cd-start-date').textContent = dateStr;
+  document.getElementById('cd-quote').textContent = currentGift.countdownMsg || 'كل ثانية بتعدي وانتِ في قلبي ❤️';
+
+  function tick(){
+    const now = new Date();
+    const diff = now - start;
+    if(diff < 0){ return; }
+    const totalSecs = Math.floor(diff / 1000);
+    const secs = totalSecs % 60;
+    const mins = Math.floor(totalSecs / 60) % 60;
+    const hours = Math.floor(totalSecs / 3600) % 24;
+    const days = Math.floor(totalSecs / 86400);
+    document.getElementById('cd-days').textContent = days;
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+    document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+  }
+
+  if(_countdownTimer) clearInterval(_countdownTimer);
+  tick();
+  _countdownTimer = setInterval(tick, 1000);
+  goTo('countdown-screen');
+}
+
+function proceedFromCountdown(){
+  if(_countdownTimer){ clearInterval(_countdownTimer); _countdownTimer = null; }
+  showWelcome();
+}
+
+function showWelcome(){
+  document.getElementById('welcome-text').textContent = currentGift.welcomeMsg ||
+    `حبيت اعمل هديه جديده وعايزين نملاه صورنا 💕`;
+  goTo('welcome-screen');
 }
 
 /* ---------- Music player ---------- */
@@ -887,10 +992,11 @@ function getGiftEmoji(giftName){
 
 function showFinalGift(){
   document.getElementById('final-recipient').textContent = `يا ${currentGift.recipient} 💕`;
-  document.getElementById('final-gift-name').textContent = `هديتك: ${currentGift.giftName}`;
+  document.getElementById('final-gift-name').textContent = currentGift.giftName ? `🎁 ${currentGift.giftName}` : '';
+  const msgEl = document.getElementById('final-msg');
+  msgEl.textContent = currentGift.finalMsg || '';
   const visual = document.getElementById('final-gift-visual');
   visual.textContent = '';
-  // إعادة تشغيل الأنيميشن من جديد كل مرة
   void visual.offsetWidth;
   visual.textContent = getGiftEmoji(currentGift.giftName);
   goTo('final-screen');
